@@ -18,40 +18,40 @@ while(valid == true)
     Console.ForegroundColor = ConsoleColor.DarkCyan;
     Console.Write("task-cli ");
     Console.ResetColor();
-    string? readResult = Console.ReadLine().ToLower();
+    string? input = Console.ReadLine().ToLower();
     
 
-    if (readResult != null)
+    if (input != null)
     {
-        if(readResult.Contains("add"))
+        if(input.Contains("add"))
         {
-            taskOperations.Create(readResult);
+            taskOperations.Create(input);
         }
-        else if(readResult.Contains("update"))
+        else if(input.Contains("update"))
         {
-            taskOperations.Update(readResult);
+            taskOperations.Update(input);
         }    
-        else if(readResult.Contains("delete"))
+        else if(input.Contains("delete"))
         {
-            taskOperations.Delete(readResult);           
+            taskOperations.Delete(input);           
         }
 
-        else if(readResult.Contains("mark-in-progress"))
+        else if(input.Contains("mark-in-progress"))
         {
-            taskOperations.MarkInProgress(readResult);
+            taskOperations.MarkInProgress(input);
         }
 
-        else if(readResult.Contains("mark-done"))
+        else if(input.Contains("mark-done"))
         {
-            taskOperations.MarkDone(readResult);
+            taskOperations.MarkDone(input);
         }
     
-        else if (readResult.Contains("list"))
+        else if (input.Contains("list"))
         {
-            taskOperations.List(readResult);
+            taskOperations.List(input);
         }
 
-        else if (readResult.Contains("quit"))
+        else if (input.Contains("quit"))
         {
             Console.WriteLine("Bye!");
             valid = false;
