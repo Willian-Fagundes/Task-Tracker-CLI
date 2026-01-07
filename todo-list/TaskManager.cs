@@ -1,12 +1,16 @@
 using System;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Task;
+using System.IO;
 
 
 public class TaskOperations
 {
+    
+   
     public string Validate(string input)
     {
         var commands = new List<string> { "add", "delete", "list", "update" };
@@ -32,11 +36,11 @@ public class TaskOperations
 
     public void Create(string input)
     {
+        List<ToDoTask> listaTarefas = new List<ToDoTask>();
+        
         string pattern = @"""(?<txt>[^""]*)""";
         string description = "";
         Match match = Regex.Match(input, pattern);
-        
-        
         
         if(match.Success)
         {
@@ -49,12 +53,15 @@ public class TaskOperations
         {
             Console.WriteLine("Erro descrição não encontrada! Digite 'commands' para lista de comandos");
         }
+
         var todo = new ToDoTask()
         {
-          Description = description  
+            Id = todoList.Count += 1,
+            Description = description
+            
         };
-        string jsonToDo = JsonSerializer.Serialize(todo);
-        Console.WriteLine(jsonToDo);
+        todoList.Add(todo);
+        SaveJson();
     }
 }
     /*
