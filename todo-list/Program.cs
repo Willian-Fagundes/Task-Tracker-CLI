@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Data.Common;
 
 TaskOperations taskOperations = new TaskOperations();
+
 bool valid = true;
 
 while(valid == true)
@@ -29,32 +30,35 @@ while(valid == true)
         if(command.Equals("add"))
         {
             taskOperations.Create(input);
-        }/*
-        else if(input.Contains("update"))
+        }
+        else if(command.Equals("update"))
         {
             taskOperations.Update(input);
-        }    
-        else if(input.Contains("delete"))
+        }  
+         
+        else if(command.Equals("delete"))
         {
             taskOperations.Delete(input);           
         }
 
-        else if(input.Contains("mark-in-progress"))
+        else if(command.Equals("mark-in-progress"))
         {
+            Console.WriteLine(command);
             taskOperations.MarkInProgress(input);
         }
 
-        else if(input.Contains("mark-done"))
+        else if(command.Equals("mark-done"))
         {
             taskOperations.MarkDone(input);
         }
     
-        else if (input.Contains("list"))
+        else if (command.Equals("list"))
         {
-            taskOperations.List(input);
+            Console.WriteLine(command);
+            taskOperations.ListAll(input);
         }
 
-        else if (input.Contains("quit"))
+        else if (command.Equals("quit"))
         {
             Console.WriteLine("Bye!");
             valid = false;
@@ -63,7 +67,7 @@ while(valid == true)
         else
         {
             Console.WriteLine("Error, Command not found. Type 'commands' to see all commands");
-        }*/
+        }
     }   
         
                 

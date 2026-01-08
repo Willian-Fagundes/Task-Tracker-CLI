@@ -12,7 +12,7 @@ public class TaskOperations
 
     public string Validate(string input)
     {
-        var commands = new List<string> { "add", "delete", "list", "update" };
+        var commands = new List<string> { "add", "delete", "list", "update", "mark-in-progress", "mark-done" };
 
         var validCommands = commands
             .Where(command => input.Contains(command, StringComparison.OrdinalIgnoreCase))
@@ -36,7 +36,7 @@ public class TaskOperations
     public void Create(string input)
     {
         string pattern = @"""(?<txt>[^""]*)""";
-        string description = "";
+        
         Match match = Regex.Match(input, pattern);
         
         if(match.Success)
@@ -44,7 +44,7 @@ public class TaskOperations
             
             List<ToDoTask> todoList = new List<ToDoTask>();
             FileHandler.LoadJson(ref todoList);
-            description = match.Groups["txt"].Value;
+            string description = match.Groups["txt"].Value;
             var todo = new ToDoTask()
             {
                 Id = todoList.Count + 1,
@@ -59,122 +59,142 @@ public class TaskOperations
         else
         {
             Console.WriteLine("Erro descrição não encontrada! Digite 'commands' para lista de comandos");
-        }
-
-               
+        }  
     }
-}
-    /*
+
+    
     public void Update(string input)
     {
         string pattern = @"update\s+(?<id>\d+)\s+""(?<txt>[^""]*)""";
-        int id = Convert.ToInt32(Regex.Match(input, pattern).Groups["id"].Value); 
-        using (var db = new AppDbContext())
+        Match match = Regex.Match(input, pattern);
+
+        if(match.Success)
         {
-            var UpdateTask = new ToDoTask
+            List<ToDoTask> todoList = new List<ToDoTask>();
+
+            FileHandler.LoadJson(ref todoList);
+            string description = match.Groups["txt"].Value;
+            int id = Convert.ToInt32(match.Groups["id"].Value);
+            var taskToUpdate = todoList.FirstOrDefault(t => t.Id == id);
+
+            if(taskToUpdate != null)
             {
-                Id = id,
-                Description = Regex.Match(input, pattern).Groups["txt"].Value,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            db.items.Attach(UpdateTask);
-            db.Entry(UpdateTask).Property(t => t.Description).IsModified = true;
-            db.Entry(UpdateTask).Property(t => t.UpdatedAt).IsModified = true;
-
-            db.SaveChanges();
-            Console.WriteLine("Task Updated!");
-        };
+                taskToUpdate.Description = description;
+                taskToUpdate.UpdatedAt = DateTime.UtcNow;
+                
+                FileHandler.Savejson(todoList);
+            }
+            else
+            {
+                Console.WriteLine("Erro, Id não encontrado, digite 'list' para ver todas as tarefas.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Erro descrição não encontrada! Digite 'commands' para lista de comandos");
+        }  
     }
+
 
     public void Delete(string input)
     {
-        string Padrao = @"\bdelete\s+(?<id>\d+)";
-        int id = Convert.ToInt32(Regex.Match(input, Padrao).Groups["id"].Value); 
-        using (var db = new AppDbContext())
+        string pattern = @"\bdelete\s+(?<id>\d+)";
+        Match match = Regex.Match(input, pattern);
+
+        if(match.Success)
         {
-            var DeleteTask = new ToDoTask
+            List<ToDoTask> todoList = new List<ToDoTask>();
+            FileHandler.LoadJson(ref todoList);
+            int id = Convert.ToInt32(match.Groups["id"].Value);
+            var taskToDelete = todoList.FirstOrDefault(t => t.Id == id);
+
+            if(taskToDelete != null)
             {
-                Id = id
-            };
-            db.Remove(DeleteTask);
-            db.SaveChanges();
-            Console.WriteLine("Task Deleted!");
-        };
+                todoList.Remove(taskToDelete);
+                FileHandler.Savejson(todoList);
+            }
+            
+        }
+        else
+        {
+            Console.WriteLine("Error, no id found");
+        }
+
     }
 
     public void MarkInProgress(string input)
     {
-        string Padrao = @"\bmark-in-progress\s+(?<id>\d+)";
-        int id = Convert.ToInt32(Regex.Match(input, Padrao).Groups["id"].Value);
-        using (var db = new AppDbContext())
-        {
-            var UpdateStatus = new ToDoTask
-            {
-                Id = id,
-                Status = "in-progress",
-                UpdatedAt = DateTime.UtcNow                  
-            };
-            db.items.Attach(UpdateStatus);
-            db.Entry(UpdateStatus).Property(t => t.Status).IsModified = true;
-            db.Entry(UpdateStatus).Property(t => t.UpdatedAt).IsModified = true;
+        string pattern = @"\bmark-in-progress\s+(?<id>\d+)";
+        Match match = Regex.Match(input, pattern);
 
-            db.SaveChanges();
-            Console.WriteLine("Status Updated!");
+        if(match.Success)
+        {
+            List<ToDoTask> todoList = new List<ToDoTask>();
+            FileHandler.LoadJson(ref todoList);
+
+            string status = "in-progress";
+            int id = Convert.ToInt32(match.Groups["id"].Value);
+            var statusToUpdate = todoList.FirstOrDefault(t => t.Id == id);
+
+            if(statusToUpdate != null)
+            {
+                statusToUpdate.Status = status;
+                statusToUpdate.UpdatedAt = DateTime.UtcNow;
+                FileHandler.Savejson(todoList);
+            }
         }
     }
 
     public void MarkDone(string input)
     {
-        string Padrao = @"\bmark-done\s+(?<id>\d+)";
-        int id = Convert.ToInt32(Regex.Match(input, Padrao).Groups["id"].Value);
-        using (var db = new AppDbContext())
-        {
-            var UpdateStatus = new ToDoTask
-            {
-                Id = id,
-                Status = "done",
-                UpdatedAt = DateTime.UtcNow                  
-            };
-            db.items.Attach(UpdateStatus);
-            db.Entry(UpdateStatus).Property(t => t.Status).IsModified = true;
-            db.Entry(UpdateStatus).Property(t => t.UpdatedAt).IsModified = true;
+        string pattern = @"\bmark-done\s+(?<id>\d+)";
+        Match match = Regex.Match(input, pattern);
 
-            db.SaveChanges();
-            Console.WriteLine("Status Updated!");
+        if(match.Success)
+        {
+            List<ToDoTask> todoList = new List<ToDoTask>();
+            FileHandler.LoadJson(ref todoList);
+
+            string status = "done";
+            int id = Convert.ToInt32(match.Groups["id"].Value);
+            var statusToUpdate = todoList.FirstOrDefault(t => t.Id == id);
+
+            if(statusToUpdate != null)
+            {
+                statusToUpdate.Status = status;
+                statusToUpdate.UpdatedAt = DateTime.UtcNow;
+                FileHandler.Savejson(todoList);
+            }
         }
     }
-
-    public void List(string input)
+   public void ListAll(string input)
     {
-        string padrao = @"(?<=list\s).*";
-        Match match = Regex.Match(input, padrao);
+        string pattern = @"^\blist\b";
+        Match match = Regex.Match(input, pattern);
 
-        if(match.Success&&!string.IsNullOrWhiteSpace(match.Value))
+        if(match.Success)
         {
-            string status = match.Value.Trim();
-            
-            using (var db = new AppDbContext())
+            Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", "ID", "Descrição", "Status", "Criado em"));
+            Console.WriteLine(new string('-', 65));
+            List<ToDoTask> todoList = new List<ToDoTask>();
+            FileHandler.LoadJson(ref todoList);
+            if(todoList == null || todoList.Count == 0)
             {
-                var filteredItem = db.items.Where(i => i.Status == status).ToList();
-                foreach (var i in filteredItem)
-                {
-                    Console.WriteLine($"id = {i.Id} | Description = {i.Description} | Status = {i.Status} | Created-At = {i.CreatedAt} | Upadated-At {i.UpdatedAt}");
-                }
+                Console.WriteLine("A lista esta vazia.");
+                return;
             }
-            
-        }   
-        else
-        {
-            using (var db = new AppDbContext())
+
+            foreach(var task in todoList)
             {
-                var allItems = db.items.ToList();
-                foreach(var i in allItems)
-                {
-                    Console.WriteLine($"id = {i.Id} | Description = {i.Description} | Status = {i.Status} | Created-At = {i.CreatedAt} | Updated-At = {i.UpdatedAt}");
-                };
+                string createdAt = task.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", 
+                task.Id, 
+                task.Description.Length > 20 ? task.Description.Substring(0, 17) + "..." : task.Description, 
+                task.Status, 
+                createdAt));
             }
+
+            
         }
     }
 }
-*/
