@@ -21,12 +21,10 @@ while(valid == true)
     Console.ResetColor();
     string? input = Console.ReadLine().ToLower();
     
-    
 
     if (input != null)
     {
         string command = taskOperations.Validate(input);
-        
         if(command.Equals("add"))
         {
             taskOperations.Create(input);
@@ -43,7 +41,6 @@ while(valid == true)
 
         else if(command.Equals("mark-in-progress"))
         {
-            Console.WriteLine(command);
             taskOperations.MarkInProgress(input);
         }
 
@@ -54,10 +51,13 @@ while(valid == true)
     
         else if (command.Equals("list"))
         {
-            Console.WriteLine(command);
             taskOperations.ListAll(input);
         }
-
+        else if(command.Equals("commands"))
+        {
+            taskOperations.Commands(input);   
+        }
+       
         else if (command.Equals("quit"))
         {
             Console.WriteLine("Bye!");

@@ -5,14 +5,23 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Task;
 using System.IO;
+using System.Data;
 
 
 public class TaskOperations
 {
+    public void Commands(string input)
+    {
+        var commands = new List<string> { "add", "delete", "list", "update", "mark-in-progress", "mark-done", "list-done" };
+        foreach(string command in commands)
+        {
+            Console.WriteLine(command);
+        }
+    }
 
     public string Validate(string input)
     {
-        var commands = new List<string> { "add", "delete", "list", "update", "mark-in-progress", "mark-done" };
+        var commands = new List<string> { "add", "delete", "list", "update", "mark-in-progress", "mark-done", "commands" };
 
         var validCommands = commands
             .Where(command => input.Contains(command, StringComparison.OrdinalIgnoreCase))
@@ -25,11 +34,11 @@ public class TaskOperations
         }
         else if (validCommands.Count > 1)
         {
-            return "Erro: A frase contém múltiplos comandos. Seja mais específico.";
+            return "invalid commmand";
         }
         else
         {
-            return "Erro: Nenhum comando válido encontrado. Digite 'commands' para ver a lista de comandos";
+            return "invalid, type 'commands' to see all commands";
         }
     }
 
@@ -58,7 +67,7 @@ public class TaskOperations
 
         else
         {
-            Console.WriteLine("Erro descrição não encontrada! Digite 'commands' para lista de comandos");
+            Console.WriteLine("no description found, please type a description eg. add [id] 'description'");
         }  
     }
 
@@ -86,12 +95,12 @@ public class TaskOperations
             }
             else
             {
-                Console.WriteLine("Erro, Id não encontrado, digite 'list' para ver todas as tarefas.");
+                Console.WriteLine("no id found, type list to see all tasks");
             }
         }
         else
         {
-            Console.WriteLine("Erro descrição não encontrada! Digite 'commands' para lista de comandos");
+            Console.WriteLine("no description found, please type a description eg. update [id] 'description' ");
         }  
     }
 
@@ -169,29 +178,68 @@ public class TaskOperations
     }
    public void ListAll(string input)
     {
-        string pattern = @"^\blist\b";
-        Match match = Regex.Match(input, pattern);
+        string pattern = @"\blist\s+(\w+)";
 
-        if(match.Success)
+        Match match = Regex.Match(input, pattern);
+       
+        if(!match.Success)
         {
-            Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", "ID", "Descrição", "Status", "Criado em"));
+            Console.WriteLine("All");
+            Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", "ID", "Description", "Status", "Created At", "Last Update"));
             Console.WriteLine(new string('-', 65));
             List<ToDoTask> todoList = new List<ToDoTask>();
             FileHandler.LoadJson(ref todoList);
             if(todoList == null || todoList.Count == 0)
             {
-                Console.WriteLine("A lista esta vazia.");
+                Console.WriteLine("no tasks");
                 return;
             }
-
+            
             foreach(var task in todoList)
             {
                 string createdAt = task.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                string updatedAt = task.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
                 Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", 
-                task.Id, 
-                task.Description.Length > 20 ? task.Description.Substring(0, 17) + "..." : task.Description, 
-                task.Status, 
-                createdAt));
+                task.Id, task.Description.Length > 20 ? task.Description.Substring(0, 17) + "..." : task.Description, 
+                task.Status, createdAt, updatedAt));
+            }
+        }
+        else if(match.Success)
+        {          
+            string status = "";
+            List<ToDoTask> todoList = new List<ToDoTask>();
+            FileHandler.LoadJson(ref todoList);
+            var statusList = new List<string> {"done", "todo", "in-progress"};
+            var validStatus = statusList.Where(status => input.Contains(status, StringComparison.OrdinalIgnoreCase)).ToList();
+            if(validStatus.Count == 1)
+            {
+                status = validStatus[0];
+                var resultados = todoList.Where(i => i.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                if(resultados == null || resultados.Count == 0)
+                {
+                    Console.WriteLine("no tasks");
+                    return;
+                }
+                
+                foreach(var task in resultados)
+                {
+                    Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", "ID", "Description", "Status", "Created At", "Last Update"));
+                    Console.WriteLine(new string('-', 65));
+                    string createdAt = task.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                    string updatedAt = task.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                    Console.WriteLine(string.Format("{0,-5} | {1,-20} | {2,-10} | {3}", 
+                    task.Id, task.Description.Length > 20 ? task.Description.Substring(0, 17) + "..." : task.Description, 
+                    task.Status, createdAt, updatedAt));
+                }
+            }
+            else if(validStatus.Count>1)
+            {
+                Console.WriteLine("error multiple status");
+            }
+            else
+            {
+                Console.WriteLine("status not found");
             }
 
             
